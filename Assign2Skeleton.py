@@ -4,28 +4,25 @@
 import numpy
 import scipy.stats as stats
 
-
-def calc_mean(arr, idx):
-    i = 0
-    total = 0.0
-    n = len(arr)
-    for i in range(0, len(arr)):
-        total += arr[i][idx]
-    return total / n
-
-
 trainingFile = "irisTraining.txt"
 testingFile = "irisTesting.txt"
 Xtrain = numpy.loadtxt(trainingFile)
 
+# n = number of training points, d = dimensions of training points
+n = Xtrain.shape[0]
+d = Xtrain.shape[1] - 1
+
+print(str(n))
+print(str(d))
+
 # Sort training data by class
-sortedArr = Xtrain[Xtrain[:, 4].argsort()]
+sortedArr = Xtrain[Xtrain[:, d].argsort()]
 
 # Make separate arrays for each class
 index = 0
 i = 0
 while i < len(sortedArr):
-    if sortedArr[i][4] == -1 and sortedArr[i + 1][4] == 1:
+    if sortedArr[i][d] == -1 and sortedArr[i + 1][d] == 1:
         index = i
     i += 1
 
@@ -39,12 +36,9 @@ pos = sortedArr[index:]
 #print("\n\n ..................\n\n")
 #print(pos)
 
-# flip axis
+# flip axis to make calculating mean and standard deviation easierf
 neg = numpy.swapaxes(neg, 0, 1)
 pos = numpy.swapaxes(pos, 0, 1)
-
-n = Xtrain.shape[0]
-d = Xtrain.shape[1] - 1
 
 # Training... Collect mean and standard deviation for each dimension for each class..
 # Also, calculate P(C+) and P(C-)
@@ -55,33 +49,13 @@ posSTDs = []
 negMeans = []
 negSTDs = []
 
-# calculate means for each attribute in positive matrix
-posMean1 = numpy.mean(pos[0])
-posMean2 = numpy.mean(pos[1])
-posMean3 = numpy.mean(pos[2])
-posMean4 = numpy.mean(pos[3])
-posMeans.extend((posMean1, posMean2, posMean3, posMean4))
+# calculate means and standard deviations for each attribute in positive and negative matrix
+for x in range(0, d):
+    posMeans.append(numpy.mean(pos[x]))
+    posSTDs.append(numpy.std(pos[x]))
 
-# calculate means for each attribute in negative matrix
-negMean1 = numpy.mean(neg[0])
-negMean2 = numpy.mean(neg[1])
-negMean3 = numpy.mean(neg[2])
-negMean4 = numpy.mean(neg[3])
-negMeans.extend((negMean1, negMean2, negMean3, negMean4))
-
-# calculate standard deviations for each attribute in positive matrix
-posSTD1 = numpy.std(pos[0])
-posSTD2 = numpy.std(pos[1])
-posSTD3 = numpy.std(pos[2])
-posSTD4 = numpy.std(pos[3])
-posSTDs.extend((posSTD1, posSTD2, posSTD3, posSTD4))
-
-# calculate standard deviations for each attribute in negative matrix
-negSTD1 = numpy.std(neg[0])
-negSTD2 = numpy.std(neg[1])
-negSTD3 = numpy.std(neg[2])
-negSTD4 = numpy.std(neg[3])
-negSTDs.extend((negSTD1, negSTD2, negSTD3, negSTD4))
+    negMeans.append(numpy.mean(neg[x]))
+    negSTDs.append(numpy.std(neg[x]))
 
 # calculate prior probability for classes
 posPrior = len(pos) / len(Xtrain)
@@ -96,9 +70,6 @@ fp = 0  # False Positive
 tn = 0  # True Negative
 fn = 0  # False Negative
 
-x = 0
-y = 0
-z = 0
 # iterate points in test data
 for x in range(0, nn):
     # scores for probability of point falling in positive class and negative class
@@ -107,7 +78,7 @@ for x in range(0, nn):
     # class: 1 = positive; -1 = negative
     result = 0
     # iterate attributes in test point
-    for y in range(0, len(posMeans)):
+    for y in range(0, d):
         # joint probability of attributes
         posMult *= stats.norm.pdf(Xtest[x][y], posMeans[y], posSTDs[y])
         negMult *= stats.norm.pdf(Xtest[x][y], negMeans[y], negSTDs[y])
@@ -146,14 +117,3 @@ print("Classification Precision: " + str(tp / (tp + fp)))
 print("Classification Recall: " + str(tp / (tp + fn)))
 
 
-# Iterate over all points in testing data
-# For each point find the P(C+|Xi) and P(C-|Xi) and decide if the point belongs to C+ or C-..
-# Recall we need to calculate P(Xi|C+)*P(C+) ..
-# P(Xi|C+) = P(Xi1|C+) * P(Xi2|C+)....P(Xid|C+)....Do the same for P(Xi|C-)
-# Now that you've calculate P(Xi|C+) and P(Xi|C-), we can decide which is higher
-# P(Xi|C-)*P(C-) or P(Xi|C-)*P(C-) ..
-# increment TP,FP,FN,TN accordingly, remember the true label for the ith point is in Xtest[i,d]
-
-# }
-
-# Calculate all the measures required..
