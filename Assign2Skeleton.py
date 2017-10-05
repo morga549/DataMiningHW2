@@ -58,8 +58,8 @@ for x in range(0, d):
     negSTDs.append(numpy.std(neg[x]))
 
 # calculate prior probability for classes
-posPrior = len(pos) / len(Xtrain)
-negPrior = len(neg) / len(Xtrain)
+posPrior = float(len(pos)) / len(Xtrain)
+negPrior = float(len(neg)) / len(Xtrain)
 
 # Testing .....
 Xtest = numpy.loadtxt(testingFile)
@@ -93,7 +93,7 @@ for x in range(0, nn):
         result = -1
 
     # actual class of test point
-    actual = Xtrain[x][4]
+    actual = Xtest[x][4]
 
     # comparing our prediction to actual
     if result == 1 and actual == 1:
@@ -105,7 +105,7 @@ for x in range(0, nn):
     elif result == -1 and actual == 1:
         fn += 1
 
-print("\nClassification Accuracy: " + str('{accuracy:.2%}'.format(accuracy=((tp + tn )/( tp + tn + fp + fn)))))
+print("\nClassification Accuracy: " + str('{accuracy:.2%}'.format(accuracy=(float((tp + tn ))/( tp + tn + fp + fn)))))
 
 
 print("True Positive: " + str(tp))
@@ -113,7 +113,7 @@ print("True Negative: " + str(tn))
 print("False Positive: " + str(fp))
 print("False Negative: " + str(fn))
 
-print("Classification Precision: " + str(tp / (tp + fp)))
-print("Classification Recall: " + str(tp / (tp + fn)))
+print("Classification Precision: " + str(float(tp) / (tp + fp)))
+print("Classification Recall: " + str(float(tp) / (tp + fn)))
 
 
