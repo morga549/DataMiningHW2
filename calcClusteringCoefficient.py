@@ -1,6 +1,3 @@
-# A skeleton for implementing Naive Bayes Classifier in Python.
-# Author: Salem
-
 import numpy
 import scipy.stats as stats
 import sys
